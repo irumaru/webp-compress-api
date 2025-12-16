@@ -69,7 +69,7 @@ jobs:
           tags: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ needs.calc_tag.outputs.tagName }}
 
   create_release:
-    needs: docker
+    needs: [docker, calc_tag]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
