@@ -18,7 +18,7 @@ jobs:
     steps:
       - id: calc
         name: Calculate release tag
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         with:
           script: |
             const core = require('@actions/core');
