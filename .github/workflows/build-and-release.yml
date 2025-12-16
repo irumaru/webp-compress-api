@@ -8,6 +8,8 @@ permissions:
 on:
   workflow_dispatch:
 
+concurrency: build-and-release
+
 jobs:
   calc_tag:
     runs-on: ubuntu-latest
