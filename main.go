@@ -20,7 +20,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("Welcome to the Image Compression Service!<br>Use the /v1/compress endpoint to compress images to WebP format.<br><br>See: https://github.com/irumaru/webp-compress-api"))
+		_, _ = w.Write([]byte("Welcome to the Image Compression Service!\nUse the /v1/compress endpoint to compress images to WebP format.\n\nSee: https://github.com/irumaru/webp-compress-api"))
 	})
 
 	// health check endpoint
