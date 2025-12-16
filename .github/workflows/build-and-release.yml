@@ -126,6 +126,10 @@ jobs:
               releaseBody = 'First release.';
             }
 
+            // Add GHCR image link to the release body
+            const imageUrl = `ghcr.io/${process.env.GITHUB_REPOSITORY_OWNER}/${context.repo.repo}:${tagName}`;
+            releaseBody += `\n\n**Build image**:\n\n- ghcr: ${imageUrl}\n`;
+
             await github.rest.repos.createRelease({
               owner,
               repo,
