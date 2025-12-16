@@ -90,5 +90,48 @@ jobs:
             const tagName = process.env.TAG_NAME;
             console.log(`Creating tag ${tagName} at ${sha}`);
             await github.rest.git.createRef({ owner, repo, ref: `refs/tags/${tagName}`, sha });
-            await github.rest.repos.createRelease({ owner, repo, tag_name: tagName, name: tagName, body: `calver release ${tagName}`, draft: false, prerelease: false, target_commitish: sha });
+
+            // Find previous tag (excluding the new one)
+            const tagsRes = await github.rest.repos.listTags({ owner, repo, per_page: 10 });
+            const tags = tagsRes.data.map(t => t.name).filter(t => t !== tagName);
+            let previousTag = null;
+            if (tags.length > 0) {
+              // Assume tags are sorted by recency, so the first is the previous
+              previousTag = tags[0];
+            }
+
+            let releaseBody = '';
+            if (previousTag) {
+              // Get commits between previousTag and tagName
+              const compareRes = await github.rest.repos.compareCommits({
+                owner,
+                repo,
+                base: previousTag,
+                head: sha,
+              });
+              const commits = compareRes.data.commits;
+              if (commits.length > 0) {
+                releaseBody += `## Changes since [${previousTag}](https://github.com/${owner}/${repo}/releases/tag/${previousTag})\n\n`;
+                for (const c of commits) {
+                  const msg = c.commit.message.split('\n')[0];
+                  releaseBody += `- ${msg} ([${c.sha.substring(0,7)}](https://github.com/${owner}/${repo}/commit/${c.sha}))\n`;
+                }
+                releaseBody += `\n[Full diff](https://github.com/${owner}/${repo}/compare/${previousTag}...${tagName})\n`;
+              } else {
+                releaseBody += `No changes since previous release [${previousTag}](https://github.com/${owner}/${repo}/releases/tag/${previousTag}).\n`;
+              }
+            } else {
+              releaseBody = 'First release.';
+            }
+
+            await github.rest.repos.createRelease({
+              owner,
+              repo,
+              tag_name: tagName,
+              name: tagName,
+              body: releaseBody,
+              draft: false,
+              prerelease: false,
+              target_commitish: sha
+            });
             console.log(`Release ${tagName} created`);
